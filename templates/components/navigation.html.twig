@@ -1,0 +1,7 @@
+<nav>
+    <ul>
+        <li><a href="{{ path('recommendation_random') }}" {% if app.request.attributes.get('_route') == 'recommendation_random' %}class="active"{% endif %}>Random (3)</a></li>
+        <li><a href="{{ path('recommendation_w_even') }}" {% if app.request.attributes.get('_route') == 'recommendation_w_even' %}class="active"{% endif %}>W + Even Length</a></li>
+        <li><a href="{{ path('recommendation_multi_word') }}" {% if app.request.attributes.get('_route') == 'recommendation_multi_word' %}class="active"{% endif %}>Multi-Word</a></li>
+    </ul>
+</nav>
