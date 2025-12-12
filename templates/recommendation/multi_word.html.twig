@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }} - Movie Recommendations{% endblock %}
+
+{% block body %}
+    <h1>{{ title }}</h1>
+    <p>Movies with titles consisting of more than one word:</p>
+    
+    {% if movies|length > 0 %}
+        <ul class="movie-list">
+            {% for movie in movies %}
+                <li>{{ movie }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty-message">No movies matching this criteria were found.</p>
+    {% endif %}
+{% endblock %}

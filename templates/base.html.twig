@@ -2,9 +2,69 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <title>{% block title %}Movie Recommendations{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🎬</text></svg>">
         {% block stylesheets %}
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f5f5f5;
+                }
+                nav {
+                    background-color: #333;
+                    padding: 15px;
+                }
+                nav ul {
+                    list-style: none;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    gap: 20px;
+                }
+                nav ul li a {
+                    color: white;
+                    text-decoration: none;
+                    padding: 10px 15px;
+                    border-radius: 5px;
+                    transition: background-color 0.3s;
+                }
+                nav ul li a:hover,
+                nav ul li a.active {
+                    background-color: #555;
+                }
+                main {
+                    max-width: 800px;
+                    margin: 20px auto;
+                    padding: 20px;
+                    background-color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                h1 {
+                    color: #333;
+                    margin-top: 0;
+                }
+                ul.movie-list {
+                    list-style: none;
+                    padding: 0;
+                }
+                ul.movie-list li {
+                    padding: 10px 15px;
+                    border-bottom: 1px solid #eee;
+                }
+                ul.movie-list li:last-child {
+                    border-bottom: none;
+                }
+                ul.movie-list li:hover {
+                    background-color: #f9f9f9;
+                }
+                .empty-message {
+                    color: #666;
+                    font-style: italic;
+                }
+            </style>
         {% endblock %}
 
         {% block javascripts %}
@@ -12,6 +72,15 @@
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <nav>
+            <ul>
+                <li><a href="{{ path('recommendation_random') }}" {% if app.request.attributes.get('_route') == 'recommendation_random' %}class="active"{% endif %}>Random (3)</a></li>
+                <li><a href="{{ path('recommendation_w_even') }}" {% if app.request.attributes.get('_route') == 'recommendation_w_even' %}class="active"{% endif %}>W + Even Length</a></li>
+                <li><a href="{{ path('recommendation_multi_word') }}" {% if app.request.attributes.get('_route') == 'recommendation_multi_word' %}class="active"{% endif %}>Multi-Word</a></li>
+            </ul>
+        </nav>
+        <main>
+            {% block body %}{% endblock %}
+        </main>
     </body>
 </html>
