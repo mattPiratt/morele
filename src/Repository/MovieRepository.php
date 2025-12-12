@@ -103,12 +103,12 @@ class MovieRepository
     ];
 
     /**
-     * Get all movie titles.
+     * Get all unique movie titles.
      *
      * @return string[]
      */
     public function findAll(): array
     {
-        return self::MOVIES;
+        return array_values(array_unique(self::MOVIES));
     }
 }
