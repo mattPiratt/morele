@@ -46,19 +46,17 @@ class RecommendationService
     {
         $titles = $this->movieRepository->findAll();
 
-        return array_values(
-            array_filter(
-                $titles,
-                static function (string $title): bool {
-                    // Check if title starts with 'W'
-                    if (!str_starts_with($title, 'W')) {
-                        return false;
-                    }
-                    // Check if title has even number of characters
-                    $length = mb_strlen($title);
-                    return $length % 2 === 0;
+        return array_filter(
+            $titles,
+            static function (string $title): bool {
+                // Check if the title starts with 'W'
+                if (!str_starts_with($title, 'W')) {
+                    return false;
                 }
-            )
+                // Check if title has even number of characters
+                $length = mb_strlen($title);
+                return $length % 2 === 0;
+            }
         );
     }
 
@@ -71,15 +69,13 @@ class RecommendationService
     {
         $titles = $this->movieRepository->findAll();
 
-        return array_values(
-            array_filter(
-                $titles,
-                static function (string $title): bool {
-                    // Count words by splitting on whitespace
-                    $words = preg_split('/\s+/', trim($title));
-                    return is_array($words) && count($words) > 1;
-                }
-            )
+        return array_filter(
+            $titles,
+            static function (string $title): bool {
+                // Count words by splitting on whitespace
+                $words = preg_split('/\s+/', trim($title));
+                return is_array($words) && count($words) > 1;
+            }
         );
     }
 }
