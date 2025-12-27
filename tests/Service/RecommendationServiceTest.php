@@ -4,89 +4,93 @@ declare(strict_types=1);
 
 namespace App\Tests\Service;
 
+use App\DataFixtures\TestFixtures\RecommendationServiceMultiWordFixture;
+use App\DataFixtures\TestFixtures\RecommendationServiceRandomFixture;
+use App\DataFixtures\TestFixtures\RecommendationServiceWLetterFixture;
 use App\Entity\Movie;
-use App\Repository\MovieRepository;
 use App\Service\RecommendationService;
-use App\Tests\DataProvider\Service\RecommendationServiceDataProvider;
-use PHPUnit\Framework\Attributes\DataProviderExternal;
-use PHPUnit\Framework\TestCase;
+use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
+use Liip\TestFixturesBundle\Services\DatabaseTools\AbstractDatabaseTool;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class RecommendationServiceTest extends TestCase
+class RecommendationServiceTest extends KernelTestCase
 {
+    protected AbstractDatabaseTool $databaseTool;
+    private RecommendationService $service;
 
-    #[DataProviderExternal(RecommendationServiceDataProvider::class, 'getRandomThree')]
-    public function testGetRandomThree($movies, $expectedCount): void
+    protected function setUp(): void
     {
-        $service = $this->createService($movies);
-        $result = $service->getRandomThree();
+        parent::setUp();
 
-        $this->assertCount($expectedCount, $result);
+        $container = self::getContainer();
+        /** @var DatabaseToolCollection $databaseToolCollection */
+        $databaseToolCollection = $container->get(DatabaseToolCollection::class);
+        $this->databaseTool = $databaseToolCollection->get();
+
+        /** @var RecommendationService $service */
+        $service = $container->get(RecommendationService::class);
+        $this->service = $service;
+    }
+
+    public function testGetRandomThree(): void
+    {
+        $this->databaseTool->loadFixtures([RecommendationServiceRandomFixture::class]);
+
+        $result = $this->service->getRandomThree();
+
+        $this->assertCount(3, $result);
         foreach ($result as $movie) {
             $this->assertInstanceOf(Movie::class, $movie);
         }
     }
 
-    #[DataProviderExternal(RecommendationServiceDataProvider::class, 'getMoviesStartingWithWEven')]
-    public function testGetMoviesStartingWithWEvenLength($movies, $shouldMatch, $shouldNotMatch): void
+    public function testGetMoviesStartingWithWEvenLength(): void
     {
-        $service = $this->createService($movies);
-        $result = $service->getMoviesStartingWithWEvenLength();
+        $this->databaseTool->loadFixtures([RecommendationServiceWLetterFixture::class]);
+
+        $result = $this->service->getMoviesStartingWithWEvenLength();
         $resultTitles = array_map(fn(Movie $movie) => $movie->getTitle(), $result);
 
-        foreach ($shouldMatch as $title) {
-            $this->assertContains($title, $resultTitles);
-        }
-        foreach ($shouldNotMatch as $title) {
-            $this->assertNotContains($title, $resultTitles);
-        }
+        $this->assertCount(3, $result);
+        $this->assertContains('Whiplash', $resultTitles);
+        $this->assertContains('Władca', $resultTitles);
+        $this->assertContains('Wyspa tajemnic', $resultTitles);
+        $this->assertNotContains('Władca Pierścieni', $resultTitles);
+        $this->assertNotContains('Matrix', $resultTitles);
     }
 
-    #[DataProviderExternal(RecommendationServiceDataProvider::class, 'getMultiWordTitles')]
-    public function testGetMultiWordTitles($movies, $shouldMatch, $shouldNotMatch): void
+    public function testGetMultiWordTitles(): void
     {
-        $service = $this->createService($movies);
-        $result = $service->getMultiWordTitles();
+        $this->databaseTool->loadFixtures([RecommendationServiceMultiWordFixture::class]);
+
+        $result = $this->service->getMultiWordTitles();
         $resultTitles = array_map(fn(Movie $movie) => $movie->getTitle(), $result);
 
-        foreach ($shouldMatch as $title) {
-            $this->assertContains($title, $resultTitles);
-        }
-        foreach ($shouldNotMatch as $title) {
-            $this->assertNotContains($title, $resultTitles);
-        }
+        $this->assertCount(3, $result);
+        $this->assertContains('Pulp Fiction', $resultTitles);
+        $this->assertContains('Leon zawodowiec', $resultTitles);
+        $this->assertContains('Fight Club', $resultTitles);
+        $this->assertNotContains('Matrix', $resultTitles);
+        $this->assertNotContains('Django', $resultTitles);
     }
 
     /**
      * Test that all RecommendationService functions are returning Movie arrays.
      */
-    #[DataProviderExternal(RecommendationServiceDataProvider::class, 'resultsAreMovieArrays')]
-    public function testResultsAreMovieArrays($movies): void
+    public function testResultsAreMovieArrays(): void
     {
-        $service = $this->createService($movies);
+        $this->databaseTool->loadFixtures([RecommendationServiceRandomFixture::class]);
 
-        foreach ($service->getRandomThree() as $movie) {
+        foreach ($this->service->getRandomThree() as $movie) {
             $this->assertInstanceOf(Movie::class, $movie);
         }
 
-        foreach ($service->getMoviesStartingWithWEvenLength() as $movie) {
+        foreach ($this->service->getMoviesStartingWithWEvenLength() as $movie) {
             $this->assertInstanceOf(Movie::class, $movie);
         }
 
-        foreach ($service->getMultiWordTitles() as $movie) {
+        foreach ($this->service->getMultiWordTitles() as $movie) {
             $this->assertInstanceOf(Movie::class, $movie);
         }
-    }
-
-    /**
-     * Create a RecommendationService with mocked repository returning given movies.
-     *
-     * @param Movie[] $movies
-     */
-    private function createService(array $movies): RecommendationService
-    {
-        $repository = $this->createMock(MovieRepository::class);
-        $repository->method('findAllUnique')->willReturn($movies);
-
-        return new RecommendationService($repository);
     }
 }

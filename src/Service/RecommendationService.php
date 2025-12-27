@@ -24,19 +24,7 @@ class RecommendationService
      */
     public function getRandomThree(): array
     {
-        $titles = $this->movieRepository->findAllUnique();
-        $count = count($titles);
-
-        if ($count <= 3) {
-            return $titles;
-        }
-
-        $randomKeys = array_rand($titles, 3);
-
-        return array_map(
-            static fn(int|string $key): Movie => $titles[$key],
-            $randomKeys
-        );
+        return $this->movieRepository->findRandomUnique(3);
     }
 
     /**
@@ -46,21 +34,7 @@ class RecommendationService
      */
     public function getMoviesStartingWithWEvenLength(): array
     {
-        $movies = $this->movieRepository->findAllUnique();
-
-        return array_filter(
-            $movies,
-            static function (Movie $movie): bool {
-                $title = $movie->getTitle();
-                // Check if the title starts with 'W'
-                if (!str_starts_with($title, 'W')) {
-                    return false;
-                }
-                // Check if title has even number of characters
-                $length = mb_strlen($title);
-                return $length % 2 === 0;
-            }
-        );
+        return $this->movieRepository->findStartingWithWEvenLength();
     }
 
     /**
@@ -70,15 +44,6 @@ class RecommendationService
      */
     public function getMultiWordTitles(): array
     {
-        $movies = $this->movieRepository->findAllUnique();
-
-        return array_filter(
-            $movies,
-            static function (Movie $movie): bool {
-                // Count words by splitting on whitespace
-                $words = preg_split('/\s+/', trim($movie->getTitle()));
-                return is_array($words) && count($words) > 1;
-            }
-        );
+        return $this->movieRepository->findMultiWord();
     }
 }
