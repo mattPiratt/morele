@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Service;
 
 use App\Repository\MovieRepository;
+use App\Service\Recommendation\Strategy\MultiWordTitlesStrategy;
+use App\Service\Recommendation\Strategy\RandomThreeStrategy;
+use App\Service\Recommendation\Strategy\StartingWithWEvenLengthStrategy;
 use App\Service\RecommendationService;
 use App\Tests\DataProvider\Service\RecommendationServiceDataProvider;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
@@ -17,7 +20,7 @@ class RecommendationServiceTest extends TestCase
     public function testGetRandomThree($titles, $expectedCount): void
     {
         $service = $this->createService($titles);
-        $result = $service->getRandomThree();
+        $result = $service->getRecommendations(RandomThreeStrategy::NAME);
 
         $this->assertCount($expectedCount, $result);
     }
@@ -26,7 +29,7 @@ class RecommendationServiceTest extends TestCase
     public function testGetMoviesStartingWithWEvenLength($titles, $shouldMatch, $shouldNotMatch): void
     {
         $service = $this->createService($titles);
-        $result = $service->getMoviesStartingWithWEvenLength();
+        $result = $service->getRecommendations(StartingWithWEvenLengthStrategy::NAME);
 
         foreach ($shouldMatch as $title) {
             $this->assertContains($title, $result);
@@ -35,12 +38,12 @@ class RecommendationServiceTest extends TestCase
             $this->assertNotContains($title, $result);
         }
     }
-    
+
     #[DataProviderExternal(RecommendationServiceDataProvider::class, 'getMultiWordTitles')]
     public function testGetMultiWordTitles($titles, $shouldMatch, $shouldNotMatch): void
     {
         $service = $this->createService($titles);
-        $result = $service->getMultiWordTitles();
+        $result = $service->getRecommendations(MultiWordTitlesStrategy::NAME);
 
         foreach ($shouldMatch as $title) {
             $this->assertContains($title, $result);
@@ -58,15 +61,15 @@ class RecommendationServiceTest extends TestCase
     {
         $service = $this->createService($titles);
 
-        foreach ($service->getRandomThree() as $title) {
+        foreach ($service->getRecommendations(RandomThreeStrategy::NAME) as $title) {
             $this->assertIsString($title);
         }
 
-        foreach ($service->getMoviesStartingWithWEvenLength() as $title) {
+        foreach ($service->getRecommendations(StartingWithWEvenLengthStrategy::NAME) as $title) {
             $this->assertIsString($title);
         }
 
-        foreach ($service->getMultiWordTitles() as $title) {
+        foreach ($service->getRecommendations(MultiWordTitlesStrategy::NAME) as $title) {
             $this->assertIsString($title);
         }
     }
@@ -81,6 +84,12 @@ class RecommendationServiceTest extends TestCase
         $repository = $this->createMock(MovieRepository::class);
         $repository->method('findAll')->willReturn($titles);
 
-        return new RecommendationService($repository);
+        $strategies = [
+            new RandomThreeStrategy($repository),
+            new StartingWithWEvenLengthStrategy($repository),
+            new MultiWordTitlesStrategy($repository),
+        ];
+
+        return new RecommendationService($strategies);
     }
 }
