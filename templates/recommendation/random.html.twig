@@ -5,11 +5,11 @@
 {% block body %}
     <h1>{{ title }}</h1>
     <p>Here are 3 randomly selected movie recommendations for you:</p>
-    
+
     {% if movies|length > 0 %}
         <ul class="movie-list">
             {% for movie in movies %}
-                <li>{{ movie }}</li>
+                <li>{{ movie.title }}</li>
             {% endfor %}
         </ul>
     {% else %}

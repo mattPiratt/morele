@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Entity\Movie;
 use App\Repository\MovieRepository;
 
 /**
@@ -19,20 +20,21 @@ class RecommendationService
     /**
      * Get 3 random movie titles.
      *
-     * @return string[]
+     * @return Movie[]
      */
     public function getRandomThree(): array
     {
-        $titles = $this->movieRepository->findAll();
+        $titles = $this->movieRepository->findAllUnique();
+        $count = count($titles);
 
-        if (count($titles) <= 3) {
+        if ($count <= 3) {
             return $titles;
         }
 
         $randomKeys = array_rand($titles, 3);
 
         return array_map(
-            static fn(int|string $key): string => $titles[$key],
+            static fn(int|string $key): Movie => $titles[$key],
             $randomKeys
         );
     }
@@ -40,15 +42,16 @@ class RecommendationService
     /**
      * Get all movies starting with 'W' that have an even number of characters in the title.
      *
-     * @return string[]
+     * @return Movie[]
      */
     public function getMoviesStartingWithWEvenLength(): array
     {
-        $titles = $this->movieRepository->findAll();
+        $movies = $this->movieRepository->findAllUnique();
 
         return array_filter(
-            $titles,
-            static function (string $title): bool {
+            $movies,
+            static function (Movie $movie): bool {
+                $title = $movie->getTitle();
                 // Check if the title starts with 'W'
                 if (!str_starts_with($title, 'W')) {
                     return false;
@@ -63,17 +66,17 @@ class RecommendationService
     /**
      * Get all movie titles that consist of more than one word.
      *
-     * @return string[]
+     * @return Movie[]
      */
     public function getMultiWordTitles(): array
     {
-        $titles = $this->movieRepository->findAll();
+        $movies = $this->movieRepository->findAllUnique();
 
         return array_filter(
-            $titles,
-            static function (string $title): bool {
+            $movies,
+            static function (Movie $movie): bool {
                 // Count words by splitting on whitespace
-                $words = preg_split('/\s+/', trim($title));
+                $words = preg_split('/\s+/', trim($movie->getTitle()));
                 return is_array($words) && count($words) > 1;
             }
         );

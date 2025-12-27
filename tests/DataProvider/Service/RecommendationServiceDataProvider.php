@@ -2,6 +2,7 @@
 
 namespace App\Tests\DataProvider\Service;
 
+use App\Entity\Movie;
 use Generator;
 
 class RecommendationServiceDataProvider
@@ -9,26 +10,26 @@ class RecommendationServiceDataProvider
     public static function getRandomThree(): Generator
     {
         yield 'manyMoviesReturnsJustThree' => [
-            'titles' => [
-                'Movie One',
-                'Movie Two',
-                'Movie Three',
-                'Movie Four',
-                'Movie Five',
+            'movies' => [
+                new Movie('Movie One'),
+                new Movie('Movie Two'),
+                new Movie('Movie Three'),
+                new Movie('Movie Four'),
+                new Movie('Movie Five'),
             ],
             'expectedCount' => 3
         ];
 
         yield 'lessThanThreeReturnsAllMovies' => [
-            'titles' => [
-                'Movie One',
-                'Movie Two',
+            'movies' => [
+                new Movie('Movie One'),
+                new Movie('Movie Two'),
             ],
             'expectedCount' => 2
         ];
 
         yield 'emptyMoviesListReturnsNoMovies' => [
-            'titles' => [],
+            'movies' => [],
             'expectedCount' => 0
         ];
     }
@@ -37,12 +38,12 @@ class RecommendationServiceDataProvider
     public static function getMoviesStartingWithWEven(): Generator
     {
         yield 'someShouldMatchSomeShouldNot' => [
-            'titles' => [
-                'Whiplash',
-                'Władca',
-                'Wyspa tajemnic',
-                'Władca Pierścieni',
-                'Matrix',
+            'movies' => [
+                new Movie('Whiplash'),
+                new Movie('Władca'),
+                new Movie('Wyspa tajemnic'),
+                new Movie('Władca Pierścieni'),
+                new Movie('Matrix'),
             ],
             'shouldMatch' => [
                 'Whiplash',       // W + 8 chars (even) - should match
@@ -56,10 +57,10 @@ class RecommendationServiceDataProvider
         ];
 
         yield 'nothingShouldMatch' => [
-            'titles' => [
-                'Władca Pierścieni',
-                'Django',
-                'Matrix',
+            'movies' => [
+                new Movie('Władca Pierścieni'),
+                new Movie('Django'),
+                new Movie('Matrix'),
             ],
             'shouldMatch' => [
             ],
@@ -75,14 +76,14 @@ class RecommendationServiceDataProvider
     public static function getMultiWordTitles(): Generator
     {
         yield 'someShouldMatchSomeShouldNot' => [
-            'titles' => [
-                'Pulp Fiction',
-                'Leon zawodowiec',
-                'Fight Club',
-                'Władca Pierścieni: Drużyna Pierścienia',
-                'Harry Potter i Kamień Filozoficzny',
-                'Matrix',
-                'Django',
+            'movies' => [
+                new Movie('Pulp Fiction'),
+                new Movie('Leon zawodowiec'),
+                new Movie('Fight Club'),
+                new Movie('Władca Pierścieni: Drużyna Pierścienia'),
+                new Movie('Harry Potter i Kamień Filozoficzny'),
+                new Movie('Matrix'),
+                new Movie('Django'),
             ],
             'shouldMatch' => [
                 'Pulp Fiction',      // 2 words - should match
@@ -97,9 +98,9 @@ class RecommendationServiceDataProvider
             ]
         ];
         yield 'noneShouldMatch' => [
-            'titles' => [
-                'Matrix',
-                'Django',
+            'movies' => [
+                new Movie('Matrix'),
+                new Movie('Django'),
             ],
             'shouldMatch' => [
             ],
@@ -110,14 +111,14 @@ class RecommendationServiceDataProvider
         ];
     }
 
-    public static function resultsAreStringArrays(): Generator
+    public static function resultsAreMovieArrays(): Generator
     {
         yield [
             [
-                'Pulp Fiction',
-                'Matrix',
-                'Whiplash',
-                'Wielki Gatsby',
+                new Movie('Pulp Fiction'),
+                new Movie('Matrix'),
+                new Movie('Whiplash'),
+                new Movie('Wielki Gatsby'),
             ]
         ];
     }
