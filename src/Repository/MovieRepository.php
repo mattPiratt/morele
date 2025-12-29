@@ -25,35 +25,24 @@ class MovieRepository extends ServiceEntityRepository
      */
     public function findRandomUnique(int $limit = 3): array
     {
-        $allUnique = $this->findAllUnique();
-        $count = count($allUnique);
+        $allIds = $this->createQueryBuilder('m')
+            ->select('m.id')
+            ->groupBy('m.title')
+            ->getQuery()
+            ->getSingleColumnResult();
 
-        if ($count <= $limit) {
-            return $allUnique;
+        if (empty($allIds)) {
+            return [];
         }
 
-        $randomKeys = array_rand($allUnique, $limit);
+        $randomKeys = array_rand($allIds, $limit);
         if (!is_array($randomKeys)) {
             $randomKeys = [$randomKeys];
         }
 
-        return array_map(
-            static fn(int|string $key): Movie => $allUnique[$key],
-            $randomKeys
-        );
-    }
+        $selectedIds = array_map(fn($key) => $allIds[$key], $randomKeys);
 
-    /**
-     * Returns only unique movies
-     *
-     * @return Movie[]
-     */
-    public function findAllUnique(): array
-    {
-        return $this->createQueryBuilder('m')
-            ->groupBy('m.title')
-            ->getQuery()
-            ->getResult();
+        return $this->findBy(['id' => $selectedIds]);
     }
 
     /**
